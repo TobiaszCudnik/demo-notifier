@@ -1,0 +1,37 @@
+version: '3'
+
+dotenv: ['.env']
+
+tasks:
+
+  build:
+    cmds:
+      - go mod tidy
+      - cd cmd/notify && go build notify.go
+      - cd cmd/echo_server && go build echo_server.go
+    silent: true
+
+  start-echo-server:
+    cmds:
+      - go run cmd/echo_server/echo_server.go
+    silent: true
+
+  start:
+    cmds:
+      - go run cmd/notify/notify.go
+
+  test-echo:
+    cmds:
+      - task: build
+      - go run cmd/notify/notify.go --batch-amount 2 --interval 1 < test/msgs
+
+  test:
+    cmds:
+      - go clean -testcache
+      - go test ./... -v
+
+  clean:
+    cmds:
+      - rm cmd/notify/notify
+      - rm cmd/echo_server/echo_server
+    silent: true
